@@ -1,76 +1,47 @@
-# Netflix Movies Clustering
+# Netflix Movie Clustering
 
-## Project Description
-This project explores clustering of Netflix movies based on their **duration, rating, and primary genre**. Using **KMeans clustering**, movies were grouped into 5 clusters to uncover patterns in content characteristics. The goal is to understand how movies differ by length, rating, and genre on Netflix.
+An exploratory clustering project examining how Netflix movies group by duration, content classification and primary genre.
 
 ## Dataset
-- Source: [Netflix Titles Dataset](https://www.kaggle.com/datasets/shivamb/netflix-shows)
-- Columns used:
-  - `title` — Movie title
-  - `type` — Movie or TV Show
-  - `duration` — Duration of the movie (in minutes)
-  - `rating` — Content rating (e.g., PG, R)
-  - `listed_in` — Genres/categories
-- Missing values were dropped for selected columns, and only movies were considered (no TV shows).
 
-## Steps / Methodology
+Source: Netflix Titles Dataset on Kaggle (`shivamb/netflix-shows`). The analysis focuses on movies rather than TV shows and uses:
 
-### 1. Preprocessing
-- Filtered dataset to only include movies (`duration` containing 'min').
-- Converted `duration` to integer (minutes).
-- Extracted primary genre from `listed_in`.
-- Encoded categorical variables:
-  - `rating` to `rating_encoded` (LabelEncoder)
-  - `genre` to `genre_encoded` (LabelEncoder)
+- `duration` — movie length in minutes
+- `rating` — Netflix content classification such as PG, R or TV-MA
+- `listed_in` — genre/category information
 
-### 2. Clustering
-- Features used: `rating_encoded`, `duration`, `genre_encoded`.
-- Standardised features using `StandardScaler`.
-- Applied K-Means clustering with 5 clusters:
-  ```python
-  kmeans = KMeans(n_clusters=5, random_state=77)
-  movies['cluster'] = kmeans.fit_predict(X_scaled)
+## Workflow
 
-  ## 📈 Results
+1. Filter the dataset to movies and clean duration values.
+2. Extract a primary genre from the category field.
+3. Encode categorical features and standardise the feature matrix.
+4. Apply K-Means clustering with five clusters.
+5. Visualise and summarise the resulting groups.
 
-### Scatter Plot (Clusters by Duration vs Rating)
-![Clusters](images/cluster_scatter.png)
+## Important methodological limitation
 
-This scatterplot shows the clusters of Netflix movies by **duration** (x-axis) and **encoded rating** (y-axis).  
-- Each color represents one of the **5 clusters**.  
-- We observe dense groupings around **shorter durations (50–120 min)** and mid-to-high ratings, while longer movies (over 150 min) form a separate cluster.  
+The original notebook uses integer label encoding for nominal variables such as content classification and genre before applying K-Means. This is a useful early clustering exercise, but it imposes an artificial numeric ordering and distance structure on categories that do not naturally have one. For example, an encoded value of 7 is not inherently "more" genre or a "better" rating than a value of 3.
 
----
+Because K-Means relies on Euclidean distance, the categorical treatment limits how strongly the resulting clusters should be interpreted. A stronger follow-up would use one-hot encoding where appropriate or a mixed-data clustering method such as k-prototypes or Gower-distance-based clustering.
 
-### Cluster Summary Table
-![Cluster Summary](images/clusters_summary.png)
+Also, the Netflix `rating` field is a **content classification**, not an audience review score. Cluster summaries should therefore be interpreted as differences in content classifications rather than differences in audience approval.
 
-| Cluster | Avg. Duration | Avg. Rating (Encoded) | Dominant Genre              | Insights |
-|---------|---------------|------------------------|-----------------------------|----------|
-| **0**   | ~98 min       | ~7.8                  | Dramas                      | Standard-length dramas with strong ratings |
-| **1**   | ~101 min      | ~4.4                  | Comedies                    | Comedies of varied length but generally lower ratings |
-| **2**   | ~72 min       | ~7.3                  | Stand-Up Comedy             | Shorter content, moderate ratings, clustered tightly |
-| **3**   | ~141 min      | ~6.4                  | Dramas                      | Long-duration dramas with slightly lower ratings |
-| **4**   | ~52 min       | ~9.0                  | Children & Family Movies    | Shortest content with the **highest ratings** |
+## Repository structure
 
----
+- `netflix_clustering.ipynb` — exploratory notebook
+- `data/` — dataset location
+- `images/` — generated visualisations
+- `requirements.txt` — Python dependencies
 
-## Analysis & Insights
+## Tools
 
-1. **Dramas Split into Two Clusters**  
-   - **Cluster 0**: Standard dramas (~100 min) with strong ratings.  
-   - **Cluster 3**: Long dramas (~140+ min) that tend to receive lower ratings.  
-   This suggests **movie length affects audience perception**.
+Python, pandas, NumPy, matplotlib, seaborn, scikit-learn
 
-2. **Comedies (Cluster 1)**  
-   - Cover a wide range of durations but receive **lower ratings overall**.  
-   - Indicates variability in comedic content but **less consistent audience reception**.
+## Next improvements
 
-3. **Stand-Up Comedy (Cluster 2)**  
-   - Shorter (~70 min), clustered tightly.  
-   - Ratings are decent but not as high as family movies.  
+- Replace ordinal label encoding of nominal categories with an appropriate categorical representation.
+- Compare several cluster counts using diagnostics such as silhouette score.
+- Test cluster stability under alternative preprocessing choices.
+- Produce cluster profiles based on interpretable original features.
 
-4. **Children & Family Movies (Cluster 4)**  
-   - **Shortest duration (~50 min)** but **highest average ratings**.  
-   - Suggests shorter, family-friendly content performs well with audiences.  
-
+This repository is retained as an early unsupervised-learning project, with its methodological limitations documented explicitly rather than disguised by prettier charts. Science survives embarrassment; portfolios should too.
